@@ -7,21 +7,25 @@ interface GameBoundaries {
     yMax: number;
 }
 
+
+// readability, snake sizes and tested multiplier, scale comes from tutorial
 const SNAKE_SIZE = 15;
+const SNAKE_COLLIDER = SNAKE_SIZE * 1.5;
+const SCALING_FACTOR = 10;
 
 export const checkGameOver = (
     snakeHead: Coordinate, 
-    boundaries: any
-    ):boolean => {
-    return (
-            snakeHead.x <  boundaries.xMin
-        || snakeHead.x   > boundaries.xMax
-        || snakeHead.y < boundaries.yMin
-        || snakeHead.y  > boundaries.yMax
-    )
+    boundaries: GameBoundaries
+): boolean => {
+    const scaledSnakeHeadX = snakeHead.x * SCALING_FACTOR;
+    const scaledSnakeHeadY = snakeHead.y * SCALING_FACTOR;
+    return (  // CHECKS FOR COLLISION WITH WALLS, ALLOWS HALF OF SNAKES HEAD TO DISAPPEAR
+        scaledSnakeHeadX < boundaries.xMin ||
+        scaledSnakeHeadX > (boundaries.xMax - SNAKE_COLLIDER) ||
+        scaledSnakeHeadY < boundaries.yMin ||
+        scaledSnakeHeadY > (boundaries.yMax - SNAKE_COLLIDER)
+    );
+};
 
 
-}
 
-
-// KATSO MINNE SNAKE SIZE LISÄTÄÄN

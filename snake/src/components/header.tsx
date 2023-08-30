@@ -6,6 +6,7 @@ import { FontAwesome } from '@expo/vector-icons';
 interface HeaderProps {
     reloadGame: () => void;
     pauseGame: () => void;
+    mainMenu: () => void;
     children: JSX.Element;
     isPaused: boolean;
 }
@@ -14,6 +15,7 @@ export default function Header({
     children,
     reloadGame,
     pauseGame,
+    mainMenu,
     isPaused,
 }: HeaderProps): JSX.Element {
     return (
@@ -30,6 +32,9 @@ export default function Header({
                 />
             </TouchableOpacity>
             {children}
+            <TouchableOpacity onPress={mainMenu}>
+                <Ionicons name="menu" size={35} color={Colors.primary} />
+            </TouchableOpacity>
         </View>
     )};
 

@@ -10,12 +10,14 @@ import Food from './food';
 import { checkEatsFood } from '../utility/checkEatsFood';
 import { randomFoodPosition } from '../utility/randomFoodPosition';
 import Header from './header';
+import MainMenu from './mainmenu';
 
 const SNAKE_INITIAL_POSITION = [{x: 5, y: 5}];
 const FOOD_INITIAL_POSITION = {x: 5, y: 20};
 //const GAME_BOUNDS = { xMin: 0, xMax: 37, yMin: 0, yMax: 72};
-const MOVE_INTERVAL = 50;
+ //const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 10;
+const SNAKE_SIZE = 15;
 
 export default function Game():JSX.Element {
     const [direction, setDirection] = React.useState<Direction>(Direction.Right);
@@ -24,9 +26,10 @@ export default function Game():JSX.Element {
     const [isGameOver, setIsGameOver] = React.useState<boolean>(false);
     const [isPaused, setIsPaused] = React.useState<boolean>(true);
     const [score, setScore] = React.useState<number>(0);
-    const [gameBounds, setGameBounds] = React.useState(null);
-
-
+    const [gameBounds, setGameBounds] = React.useState<{ xMin: number, xMax: number, yMin: number, yMax: number } | null>(null);
+    const [pressedStartGame, setPressedStartGame] = React.useState<boolean>(false);
+    const [MOVE_INTERVAL, setMoveInterval] = React.useState<number>(50);
+    const [difficulty, setDifficulty] = React.useState<number>(2);
 
     React.useEffect(() => {
         if(!isGameOver){
@@ -38,17 +41,42 @@ export default function Game():JSX.Element {
 
     },[snake, isGameOver, isPaused]);
 
+    React.useEffect(() => {
+        if(difficulty === 1) {
+            setMoveInterval(75);
+        } else if (difficulty === 2) {
+            setMoveInterval(50);
+        } else if (difficulty === 3) {
+            setMoveInterval(25);
+        }
+    }, [difficulty]);
+
+    const handleDifficulty = (difficulty: number) => {
+        setDifficulty(difficulty);
+        console.log(difficulty);
+    };
+
     const handleLayout = (event: any) => {
         const {width, height} = event.nativeEvent.layout;
+        console.log("Raw dimensions:", {width, height});
+    
+        // Debug calculations
+        const calculatedXMax = width - SNAKE_SIZE;
+        const calculatedYMax = height - SNAKE_SIZE;
+        
+        console.log("Calculated boundaries:", {calculatedXMax, calculatedYMax});
+    
         const newGameBounds = {
             xMin: 0,
-            xMax: width / 10 - 1,
+            xMax: calculatedXMax,
             yMin: 0,
-            yMax: height / 10 - 1,
+            yMax: calculatedYMax,
         };
+        
         setGameBounds(newGameBounds);
-        console.log(newGameBounds);
+        console.log("Set boundaries:", newGameBounds);
     };
+    
 
     const moveSnake = () => {
         const snakeHead = snake[0];
@@ -58,6 +86,7 @@ export default function Game():JSX.Element {
         // game over check
         if (checkGameOver(snakeHead, gameBounds)) {
             setIsGameOver((prev) => !prev);
+            console.log("game over");
             return;
         }
 
@@ -80,12 +109,11 @@ export default function Game():JSX.Element {
         // grow snake
 
         if(checkEatsFood(newHead, food, 2)) {
-            setFood(randomFoodPosition(gameBounds?.xMax ?? 0, gameBounds?.yMax ?? 0));
+            setFood(randomFoodPosition(gameBounds.xMax, gameBounds.yMax, snake));
             setSnake([newHead, ...snake]);
-            // new food and score up
-            
             setScore(score + SCORE_INCREMENT);
-        } 
+        }
+         
         // check if colliding with self
         else if (checkCollideSelf(newHead, snake)) {
             setIsGameOver((prev) => !prev);
@@ -124,6 +152,15 @@ export default function Game():JSX.Element {
 
     };
 
+    const handleStartGame = () => {
+        setPressedStartGame(true);
+    };
+
+    const handleMainMenu = () => {
+        setPressedStartGame(false);
+        reloadGame();
+    };
+
     const reloadGame = () => {
         setSnake(SNAKE_INITIAL_POSITION);
         setFood(FOOD_INITIAL_POSITION);
@@ -139,12 +176,14 @@ export default function Game():JSX.Element {
     };
 
     return (
+        pressedStartGame ? 
         <PanGestureHandler onGestureEvent={handleGesture}>
             <SafeAreaView style={styles.container}>
                 <Header 
                 isPaused={isPaused} 
                 pauseGame={pauseGame} 
                 reloadGame={reloadGame}
+                mainMenu={handleMainMenu}
                 >
                     <Text style={styles.score}>{score}</Text>
                 </Header>
@@ -154,8 +193,17 @@ export default function Game():JSX.Element {
                 </View> 
             </SafeAreaView>
         </PanGestureHandler>
+        :
+        <SafeAreaView style={styles.container}>
+            <MainMenu
+            startGame={handleStartGame}
+            difficultyHandle={handleDifficulty}
+            difficulty={difficulty}
+            />
+        </SafeAreaView>
     )
 }
+
 
 const styles = StyleSheet.create({
     container: {
