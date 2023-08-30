@@ -13,7 +13,7 @@ import Header from './header';
 
 const SNAKE_INITIAL_POSITION = [{x: 5, y: 5}];
 const FOOD_INITIAL_POSITION = {x: 5, y: 20};
-const GAME_BOUNDS = { xMin: 0, xMax: 37, yMin: 0, yMax: 72};
+//const GAME_BOUNDS = { xMin: 0, xMax: 37, yMin: 0, yMax: 72};
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 10;
 
@@ -22,8 +22,10 @@ export default function Game():JSX.Element {
     const [snake, setSnake] = React.useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
     const [food, setFood] = React.useState<Coordinate>(FOOD_INITIAL_POSITION);
     const [isGameOver, setIsGameOver] = React.useState<boolean>(false);
-    const [isPaused, setIsPaused] = React.useState<boolean>(false);
+    const [isPaused, setIsPaused] = React.useState<boolean>(true);
     const [score, setScore] = React.useState<number>(0);
+    const [gameBounds, setGameBounds] = React.useState(null);
+
 
 
     React.useEffect(() => {
@@ -36,12 +38,25 @@ export default function Game():JSX.Element {
 
     },[snake, isGameOver, isPaused]);
 
+    const handleLayout = (event: any) => {
+        const {width, height} = event.nativeEvent.layout;
+        const newGameBounds = {
+            xMin: 0,
+            xMax: width / 10 - 1,
+            yMin: 0,
+            yMax: height / 10 - 1,
+        };
+        setGameBounds(newGameBounds);
+        console.log(newGameBounds);
+    };
+
     const moveSnake = () => {
         const snakeHead = snake[0];
         const newHead = {...snakeHead};
 
+        if(!gameBounds) return; // wait for getting bounds
         // game over check
-        if (checkGameOver(snakeHead, GAME_BOUNDS)) {
+        if (checkGameOver(snakeHead, gameBounds)) {
             setIsGameOver((prev) => !prev);
             return;
         }
@@ -65,7 +80,7 @@ export default function Game():JSX.Element {
         // grow snake
 
         if(checkEatsFood(newHead, food, 2)) {
-            setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
+            setFood(randomFoodPosition(gameBounds?.xMax ?? 0, gameBounds?.yMax ?? 0));
             setSnake([newHead, ...snake]);
             // new food and score up
             
@@ -115,7 +130,7 @@ export default function Game():JSX.Element {
         setIsGameOver(false);
         setDirection(Direction.Right);
         setScore(0);
-        setIsPaused(false);
+        setIsPaused(true);
     };
 
 
@@ -133,7 +148,7 @@ export default function Game():JSX.Element {
                 >
                     <Text style={styles.score}>{score}</Text>
                 </Header>
-               <View style={styles.boundaries}>
+               <View onLayout={handleLayout} style={styles.boundaries}>
                     <Snake snake={snake}/>
                     <Food x={food.x} y={food.y}/>
                 </View> 
