@@ -21,3 +21,5 @@ Select difficulty and play, the game starts paused. Play the game until failure 
 Game movement is swipe directions.
  
  
+Tutorial used in original version:
+https://www.youtube.com/watch?v=hXogPCM4FS8
