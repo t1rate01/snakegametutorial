@@ -19,7 +19,12 @@ const FOOD_INITIAL_POSITION = {x: 5, y: 20};
 const SCORE_INCREMENT = 10;
 const SNAKE_SIZE = 15;
 
-export default function Game():JSX.Element {
+interface GameProps {
+    handleMainMenu: () => void;
+    difficulty: number;
+    saveScore: (score: number) => void;
+}
+export default function Game({handleMainMenu, difficulty, saveScore}: GameProps):JSX.Element {
     const [direction, setDirection] = React.useState<Direction>(Direction.Right);
     const [snake, setSnake] = React.useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
     const [food, setFood] = React.useState<Coordinate>(FOOD_INITIAL_POSITION);
@@ -27,19 +32,19 @@ export default function Game():JSX.Element {
     const [isPaused, setIsPaused] = React.useState<boolean>(true);
     const [score, setScore] = React.useState<number>(0);
     const [gameBounds, setGameBounds] = React.useState<{ xMin: number, xMax: number, yMin: number, yMax: number } | null>(null);
-    const [pressedStartGame, setPressedStartGame] = React.useState<boolean>(false);
     const [MOVE_INTERVAL, setMoveInterval] = React.useState<number>(50);
-    const [difficulty, setDifficulty] = React.useState<number>(2);
+
 
     React.useEffect(() => {
         if(!isGameOver){
+            const snakeSpeed = difficulty === 1 ? 75 : difficulty === 2 ? 50 : 25;
             const intervalId = setInterval(() => {
               !isPaused &&  moveSnake();
-            }, MOVE_INTERVAL);
-            return () => clearInterval(intervalId); // for memoryleaks
+            }, snakeSpeed);
+            return () => clearInterval(intervalId); // for memory leaks
         }
+    },[snake, isGameOver, isPaused, difficulty]);
 
-    },[snake, isGameOver, isPaused]);
 
     React.useEffect(() => {
         if(difficulty === 1) {
@@ -51,10 +56,7 @@ export default function Game():JSX.Element {
         }
     }, [difficulty]);
 
-    const handleDifficulty = (difficulty: number) => {
-        setDifficulty(difficulty);
-        console.log(difficulty);
-    };
+   const snakeSpeed = difficulty === 1 ? 75 : difficulty === 2 ? 50 : 25;
 
     const handleLayout = (event: any) => {
         const {width, height} = event.nativeEvent.layout;
@@ -152,14 +154,6 @@ export default function Game():JSX.Element {
 
     };
 
-    const handleStartGame = () => {
-        setPressedStartGame(true);
-    };
-
-    const handleMainMenu = () => {
-        setPressedStartGame(false);
-        reloadGame();
-    };
 
     const reloadGame = () => {
         setSnake(SNAKE_INITIAL_POSITION);
@@ -168,6 +162,7 @@ export default function Game():JSX.Element {
         setDirection(Direction.Right);
         setScore(0);
         setIsPaused(true);
+        saveScore(score);
     };
 
 
@@ -176,32 +171,24 @@ export default function Game():JSX.Element {
     };
 
     return (
-        pressedStartGame ? 
         <PanGestureHandler onGestureEvent={handleGesture}>
             <SafeAreaView style={styles.container}>
-                <Header 
+            <Header 
                 isPaused={isPaused} 
                 pauseGame={pauseGame} 
                 reloadGame={reloadGame}
-                mainMenu={handleMainMenu}
-                >
-                    <Text style={styles.score}>{score}</Text>
-                </Header>
-               <View onLayout={handleLayout} style={styles.boundaries}>
+                mainMenu={handleMainMenu} 
+            >
+                <Text style={styles.score}>{score}</Text>
+            </Header>
+
+                <View onLayout={handleLayout} style={styles.boundaries}>
                     <Snake snake={snake}/>
                     <Food x={food.x} y={food.y}/>
                 </View> 
             </SafeAreaView>
         </PanGestureHandler>
-        :
-        <SafeAreaView style={styles.container}>
-            <MainMenu
-            startGame={handleStartGame}
-            difficultyHandle={handleDifficulty}
-            difficulty={difficulty}
-            />
-        </SafeAreaView>
-    )
+    );
 }
 
 

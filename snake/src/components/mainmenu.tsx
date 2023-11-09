@@ -1,12 +1,15 @@
-import { TouchableOpacity, StyleSheet, View, Text,  } from 'react-native';
+import { TouchableOpacity, StyleSheet, View, Text, TextInput  } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../styles/colors';
 import { FontAwesome } from '@expo/vector-icons';
+import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface MainMenuProps {
     startGame: () => void;
     difficultyHandle: (difficulty: number) => void;
     difficulty: number;
+    setUsername: (name: string) => void;
     // highScore: () => void;
 }
 
@@ -14,10 +17,34 @@ export default function MainMenu({
     startGame,
     difficultyHandle,
     difficulty,
+    setUsername,
     // highScore,
 }: MainMenuProps): JSX.Element {
+    const [highScores, setHighScores] = React.useState<Record<string, number>>({});
+
+    React.useEffect(() => {
+        const getHighScores = async () => {
+          try {
+            const highScoresRaw = await AsyncStorage.getItem('highScores');
+            const highScores = highScoresRaw ? JSON.parse(highScoresRaw) : {};
+            setHighScores(highScores);
+          } catch (error) {
+            console.log('Error retrieving high scores', error);
+          }
+        };
+    
+        getHighScores();
+      }, []);
+    
+   
     return (
         <View style={styles.container}>
+            <TextInput
+            
+            onChangeText={setUsername}
+            placeholder={'Enter your name'}
+            style={styles.input}
+    ></TextInput>
             <TouchableOpacity onPress={startGame}>
                 <FontAwesome
                     name={'play-circle'}
@@ -37,6 +64,12 @@ export default function MainMenu({
                     <Text style={difficulty === 3 ? styles.boldText : null}>Hard</Text>
                 </TouchableOpacity>
             </View>
+            <View style={styles.highscore}>
+                <Text>High scores</Text>
+      {Object.entries(highScores).map(([username, score], index) => (
+        <Text key={index}>{`${username}: ${score}`}</Text>
+      ))}
+    </View>
         </View>
     );};
 
@@ -65,4 +98,13 @@ const styles = StyleSheet.create({
     boldText: {
         fontWeight: 'bold',
     },
+    input: {
+        height: 40,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
+      },
+      highscore: {
+        marginTop: 20,
+      },
 });
