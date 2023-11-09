@@ -15,7 +15,7 @@
 
 
 # Current state and how to use:  
-Run npm install in snake directory, run npx expo app and connect to your phone.  
+Run npm install in snake directory (project comes in a snakegametutorial directory), run npx expo app and connect to your phone.  
 Enter username, press enter on phones keyboard. 
 Select difficulty and press play, the game starts paused. Play the game until failure and press menu to go back and see high score saved locally and globally.  
   
