@@ -3,6 +3,17 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import GameScreen from './src/screens/GameScreen';
 import MainMenuScreen from './src/screens/MainMenuScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { postHighScore } from './src/utility/highScoreToFireBase';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from './config';
+
+
+import 'firebase/database';
+
+const firebaseconff = firebaseConfig;
+
+const app = initializeApp(firebaseconff);
+
 
 const App = () => {
   const [currentScreen, setCurrentScreen] = useState('MainMenu');
@@ -23,21 +34,26 @@ const App = () => {
   }
 
 
-  const saveScore = async (score: number) => {
+  const saveScore = async (score: number) => {  // yhdistää sekä firebase että asyncstorage
     try {
       const highScoresRaw = await AsyncStorage.getItem('highScores');
       const highScores = highScoresRaw ? JSON.parse(highScoresRaw) : {};
-      // Assuming you want to keep the highest score for each user
+      // Check if highest score
       const highestScore = highScores[username] || 0;
       if (score > highestScore) {
         highScores[username] = score;
         await AsyncStorage.setItem('highScores', JSON.stringify(highScores));
         console.log('High score saved');
+        // save to firebase
+        postHighScore(username, score);
       }
+
     } catch (error) {
       console.error('Error saving high score', error);
     }
   };
+
+  
   
 
   

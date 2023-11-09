@@ -4,6 +4,7 @@ import { Colors } from '../styles/colors';
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getHighScoresFromFirebase } from '../utility/highScoreToFireBase';
 
 interface MainMenuProps {
     startGame: () => void;
@@ -21,8 +22,9 @@ export default function MainMenu({
     // highScore,
 }: MainMenuProps): JSX.Element {
     const [highScores, setHighScores] = React.useState<Record<string, number>>({});
+    const [fireBaseHighScores, setFireBaseHighScores] = React.useState<Record<string, number>>({});
 
-    React.useEffect(() => {
+    React.useEffect(() => {   // parses the string to make an object
         const getHighScores = async () => {
           try {
             const highScoresRaw = await AsyncStorage.getItem('highScores');
@@ -35,6 +37,26 @@ export default function MainMenu({
     
         getHighScores();
       }, []);
+
+      React.useEffect(() => {  // fetches array of objects, uses reduce to make an object
+        const fetchFireBaseHighScores = async () => {
+            try {
+                const fetchedHighScoresArray = await getHighScoresFromFirebase();
+                const fetchedHighScores = fetchedHighScoresArray.reduce<Record<string, number>>((acc, { username, score }) => {
+                    acc[username] = score;
+                    return acc;
+                }, {});
+                
+                setFireBaseHighScores(fetchedHighScores);
+            } catch (error) {
+                console.log('Error retrieving high scores from Firebase', error);
+            }
+        };
+    
+        fetchFireBaseHighScores();
+    }, []);
+    
+ 
     
    
     return (
@@ -65,11 +87,18 @@ export default function MainMenu({
                 </TouchableOpacity>
             </View>
             <View style={styles.highscore}>
-                <Text>High scores</Text>
+                <Text>Local high scores</Text>
       {Object.entries(highScores).map(([username, score], index) => (
         <Text key={index}>{`${username}: ${score}`}</Text>
+        
       ))}
     </View>
+    <View style={styles.highscore}>
+                <Text>Global high scores</Text>
+        {Object.entries(fireBaseHighScores).map(([username, score], index) => (
+        <Text key={index}>{`${username}: ${score}`}</Text>
+        ))}
+        </View>
         </View>
     );};
 

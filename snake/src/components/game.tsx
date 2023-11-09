@@ -12,6 +12,7 @@ import { randomFoodPosition } from '../utility/randomFoodPosition';
 import Header from './header';
 import MainMenu from './mainmenu';
 
+
 const SNAKE_INITIAL_POSITION = [{x: 5, y: 5}];
 const FOOD_INITIAL_POSITION = {x: 5, y: 20};
 //const GAME_BOUNDS = { xMin: 0, xMax: 37, yMin: 0, yMax: 72};
@@ -88,6 +89,7 @@ export default function Game({handleMainMenu, difficulty, saveScore}: GameProps)
         // game over check
         if (checkGameOver(snakeHead, gameBounds)) {
             saveScore(score);
+            
             setIsGameOver((prev) => !prev);
             console.log("game over");
             return;
