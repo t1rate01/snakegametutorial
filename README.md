@@ -10,7 +10,8 @@
 
 
  Added:
- -- Locally stored highscores 
+ -- Locally stored highscores  
+ -- Firebase stored highscores (uploaded without configs)  
 
 
 # Current state and how to use:  
