@@ -9,7 +9,7 @@
  -- Prevented snake from making a 180 on itself, and colliding with itself causes gameover  
 
 
- Added:
+ Added:  
  -- Locally stored highscores  
  -- Firebase stored highscores (uploaded without configs)  
 
