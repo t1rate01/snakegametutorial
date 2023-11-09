@@ -9,7 +9,13 @@
  -- Prevented snake from making a 180 on itself, and colliding with itself causes gameover  
 
 
- Plans:  
- -- Locally stored highscores per difficulty  
+ Added:
+ -- Locally stored highscores 
+
+
+Current state:
+Run npm install in snake directory, run npx expo app and connect to your phone. 
+Enter username, press enter on phones keyboard. 
+Select difficulty and play, the game starts paused. Play the game until failure, or 
  
  

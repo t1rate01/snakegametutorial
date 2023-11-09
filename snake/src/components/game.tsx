@@ -87,6 +87,7 @@ export default function Game({handleMainMenu, difficulty, saveScore}: GameProps)
         if(!gameBounds) return; // wait for getting bounds
         // game over check
         if (checkGameOver(snakeHead, gameBounds)) {
+            saveScore(score);
             setIsGameOver((prev) => !prev);
             console.log("game over");
             return;
